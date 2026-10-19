@@ -1,0 +1,83 @@
+{
+  "titulo": "Modelo de Perguntas - Show do Milhão",
+  "niveis": [
+    { "valor": 1000 },
+    { "valor": 2000 },
+    { "valor": 5000 },
+    { "valor": 10000 },
+    { "valor": 20000, "checkpoint": true },
+    { "valor": 40000 },
+    { "valor": 80000 },
+    { "valor": 160000 },
+    { "valor": 320000 },
+    { "valor": 1000000 }
+  ],
+  "perguntas": [
+    {
+      "nivel": 1,
+      "pergunta": "Qual é a capital do Brasil?",
+      "alternativas": ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"],
+      "correta": 2
+    },
+    {
+      "nivel": 1,
+      "pergunta": "Quantas patas tem uma aranha?",
+      "alternativas": ["6", "8", "10", "4"],
+      "correta": 1
+    },
+    {
+      "nivel": 2,
+      "pergunta": "Quem pintou a Mona Lisa?",
+      "alternativas": ["Van Gogh", "Picasso", "Leonardo da Vinci", "Michelangelo"],
+      "correta": "C"
+    },
+    {
+      "nivel": 3,
+      "pergunta": "Qual é a fórmula química da água?",
+      "alternativas": ["CO2", "H2O", "O2", "NaCl"],
+      "correta": 1
+    },
+    {
+      "nivel": 4,
+      "pergunta": "Quem foi o primeiro presidente do Brasil?",
+      "alternativas": ["Getúlio Vargas", "Deodoro da Fonseca", "Prudente de Morais", "Floriano Peixoto"],
+      "correta": "B"
+    },
+    {
+      "nivel": 5,
+      "pergunta": "Qual é a montanha mais alta do mundo?",
+      "alternativas": ["K2", "Everest", "Kilimanjaro", "Aconcágua"],
+      "correta": 1
+    },
+    {
+      "nivel": 6,
+      "pergunta": "Quem pintou \"A Noite Estrelada\"?",
+      "alternativas": ["Claude Monet", "Vincent van Gogh", "Salvador Dalí", "Edvard Munch"],
+      "correta": 1
+    },
+    {
+      "nivel": 7,
+      "pergunta": "Quem escreveu \"Cem Anos de Solidão\"?",
+      "alternativas": ["Jorge Amado", "Gabriel García Márquez", "Mario Vargas Llosa", "Pablo Neruda"],
+      "correta": 1
+    },
+    {
+      "nivel": 8,
+      "pergunta": "Em que ano foi assinada a Lei Áurea no Brasil?",
+      "alternativas": ["1822", "1888", "1891", "1850"],
+      "correta": 1
+    },
+    {
+      "nivel": 9,
+      "pergunta": "Qual cientista formulou a Lei Periódica dos elementos químicos?",
+      "alternativas": ["Antoine Lavoisier", "Dmitri Mendeleev", "John Dalton", "Niels Bohr"],
+      "correta": 1
+    },
+    {
+      "nivel": 10,
+      "pergunta": "Qual matemático grego é considerado o \"pai da geometria\"?",
+      "alternativas": ["Pitágoras", "Arquimedes", "Euclides", "Tales de Mileto"],
+      "correta": 2
+    }
+  ]
+}

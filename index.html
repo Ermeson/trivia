@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivia do Milhão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="starfield" id="starfield"></div>
+
+<button id="btn-mute" class="mute-toggle" title="Ativar/desativar som" aria-label="Ativar/desativar som">🔊</button>
+
+<audio id="theme-music" src="audio/tema.mp3" loop preload="auto"></audio>
+<audio id="game-music" src="audio/quiz.mp3" loop preload="auto"></audio>
+
+<!-- ===================== TELA INICIAL ===================== -->
+<section id="screen-start" class="screen active">
+  <div class="logo-wrap">
+    <img src="img/trivia-milhao.png" alt="Trivia do Milhão" class="logo-img">
+  </div>
+  <p class="tagline">Quanto vale o seu conhecimento?</p>
+  <div class="start-buttons">
+    <button id="btn-play" class="btn btn-gold">Jogar</button>
+    <button id="btn-rules" class="btn btn-outline">Como Jogar</button>
+  </div>
+
+  <div class="upload-section">
+    <p class="upload-title">Perguntas em uso: <strong id="upload-source-label">padrão (embutidas)</strong></p>
+    <div class="upload-buttons">
+      <input type="file" id="json-upload" accept="application/json,.json" class="hidden-input">
+      <button id="btn-upload" class="btn btn-outline btn-small">Carregar perguntas (JSON)</button>
+      <a id="btn-download-template" class="link-small" href="data/modelo-perguntas.json" download="modelo-perguntas.json">Baixar modelo</a>
+      <button id="btn-ai-prompt" class="link-small link-button">Crie questões com IA</button>
+      <button id="btn-format-help" class="link-small link-button">Ver formato esperado</button>
+    </div>
+    <p class="upload-status" id="upload-status"></p>
+  </div>
+
+  <p class="footer-note">Clone fã-feito para fins educacionais — inspirado no clássico programa do SBT</p>
+</section>
+
+<!-- ===================== MODAL REGRAS ===================== -->
+<div id="modal-rules" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2>Como Jogar</h2>
+    <ul>
+      <li>Responda <strong>10 perguntas</strong> de dificuldade crescente e acumule prêmios até <strong>R$ 1.000.000</strong>.</li>
+      <li>Você tem <strong>3 cartas de ajuda</strong>: <em>Pular</em> (troca a pergunta), <em>Universitários</em> (mostra a opinião da plateia) e <em>Computador</em> (elimina duas alternativas erradas).</li>
+      <li>A cada pergunta respondida corretamente, você pode <strong>PARAR</strong> e levar o valor acumulado, ou continuar para a próxima pergunta.</li>
+      <li>Ao chegar na pergunta de <strong>R$ 20.000</strong>, esse valor fica garantido mesmo que você erre depois.</li>
+      <li>Errar antes disso faz você perder tudo. Boa sorte!</li>
+    </ul>
+    <button id="btn-close-rules" class="btn btn-gold">Entendi</button>
+  </div>
+</div>
+
+<!-- ===================== MODAL ERRO DE UPLOAD ===================== -->
+<div id="modal-upload-error" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2>Não foi possível carregar o arquivo</h2>
+    <ul id="upload-error-list" class="error-list"></ul>
+    <button id="btn-close-upload-error" class="btn btn-gold">Entendi</button>
+  </div>
+</div>
+
+<!-- ===================== MODAL FORMATO DO JSON ===================== -->
+<div id="modal-format-help" class="modal-overlay hidden">
+  <div class="modal-box modal-box-wide">
+    <h2>Formato do arquivo JSON</h2>
+    <p class="overlay-sub">Envie um arquivo <code>.json</code> com esta estrutura. Cada nível de 1 a 10 precisa de ao menos uma pergunta.</p>
+    <pre class="code-block">{
+  "titulo": "Nome do seu quiz (opcional)",
+  "perguntas": [
+    {
+      "nivel": 1,
+      "pergunta": "Texto da pergunta",
+      "alternativas": ["Opção A", "Opção B", "Opção C", "Opção D"],
+      "correta": 2
+    }
+  ]
+}</pre>
+    <ul class="format-notes">
+      <li><strong>nivel</strong>: número de 1 (mais fácil) a 10 (mais difícil / maior prêmio).</li>
+      <li><strong>alternativas</strong>: lista com exatamente 4 textos.</li>
+      <li><strong>correta</strong>: índice da resposta certa (0 a 3) ou letra ("A" a "D").</li>
+      <li>Opcionalmente, um campo <strong>"niveis"</strong> com 10 itens <code>{ "valor": 1000, "checkpoint": true }</code> pode substituir os valores padrão da escada de prêmios.</li>
+    </ul>
+    <button id="btn-close-format-help" class="btn btn-gold">Entendi</button>
+  </div>
+</div>
+
+<!-- ===================== MODAL PROMPT DE IA ===================== -->
+<div id="modal-ai-prompt" class="modal-overlay hidden">
+  <div class="modal-box modal-box-wide">
+    <h2>Crie perguntas com IA</h2>
+    <p class="overlay-sub">
+      Copie o prompt abaixo, cole em qualquer assistente de IA (ChatGPT, Claude, Gemini...), troque o tema
+      sugerido pelo assunto que quiser e peça para gerar as perguntas. Salve a resposta como um arquivo
+      <code>.json</code> e carregue aqui no jogo.
+    </p>
+    <textarea id="ai-prompt-text" class="prompt-textarea" rows="22" spellcheck="false"></textarea>
+    <div class="modal-actions">
+      <button id="btn-copy-prompt" class="btn btn-gold btn-small">Copiar prompt</button>
+      <button id="btn-close-ai-prompt" class="btn btn-outline btn-small">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TELA DE JOGO ===================== -->
+<section id="screen-game" class="screen">
+  <header class="app-header">
+    <img src="img/trivia-milhao.png" alt="Trivia do Milhão" class="app-header-logo">
+  </header>
+  <div class="game-layout">
+
+    <!-- Escada de prêmios -->
+    <aside class="ladder" id="ladder"></aside>
+
+    <!-- Área principal -->
+    <main class="game-main">
+
+      <div class="hud">
+        <div class="hud-item prize-current">
+          <span class="hud-label">Valendo</span>
+          <span class="hud-value" id="hud-current-value">R$ 1.000</span>
+        </div>
+        <div class="timer-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="timer-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="timer-fg" id="timer-fg" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <span class="timer-text" id="timer-text">30</span>
+        </div>
+        <div class="hud-item prize-secured">
+          <span class="hud-label">Garantido</span>
+          <span class="hud-value" id="hud-secured-value">R$ 0</span>
+        </div>
+      </div>
+
+      <div class="cards-row" id="cards-row">
+        <button class="card-lifeline" data-card="pular" title="Pular pergunta">
+          <span class="card-icon">⏭</span>
+          <span class="card-label">Pular</span>
+        </button>
+        <button class="card-lifeline" data-card="universitarios" title="Cartas Universitários">
+          <span class="card-icon">🎓</span>
+          <span class="card-label">Universitários</span>
+        </button>
+        <button class="card-lifeline" data-card="computador" title="Cartas Computador">
+          <span class="card-icon">💻</span>
+          <span class="card-label">Computador</span>
+        </button>
+      </div>
+
+      <div class="question-box" id="question-box">
+        <div class="question-level" id="question-level">PERGUNTA 1 — R$ 1.000</div>
+        <div class="question-text" id="question-text">Carregando pergunta...</div>
+      </div>
+
+      <div class="options-grid" id="options-grid">
+        <button class="option-btn" data-opt="0"><span class="opt-letter">A</span><span class="opt-text"></span></button>
+        <button class="option-btn" data-opt="1"><span class="opt-letter">B</span><span class="opt-text"></span></button>
+        <button class="option-btn" data-opt="2"><span class="opt-letter">C</span><span class="opt-text"></span></button>
+        <button class="option-btn" data-opt="3"><span class="opt-letter">D</span><span class="opt-text"></span></button>
+      </div>
+
+    </main>
+  </div>
+</section>
+
+<!-- ===================== OVERLAY UNIVERSITÁRIOS ===================== -->
+<div id="overlay-universitarios" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2>🎓 Cartas Universitários</h2>
+    <p class="overlay-sub">A plateia de universitários opinou. Veja o resultado:</p>
+    <div class="bars" id="uni-bars"></div>
+    <button class="btn btn-gold" id="btn-close-uni">Continuar</button>
+  </div>
+</div>
+
+<!-- ===================== TELA DE DECISÃO (PARAR?) ===================== -->
+<section id="screen-decision" class="screen">
+  <header class="app-header">
+    <img src="img/trivia-milhao.png" alt="Trivia do Milhão" class="app-header-logo">
+  </header>
+  <div class="decision-box">
+    <h2 class="decision-title">Resposta correta!</h2>
+    <p class="decision-text">Você ganhou <span id="decision-value">R$ 1.000</span>!</p>
+    <p class="decision-question">Quer continuar para a próxima pergunta ou parar com o valor acumulado?</p>
+    <div class="decision-buttons">
+      <button id="btn-stop" class="btn btn-outline btn-stop">PARAR E GANHAR</button>
+      <button id="btn-continue" class="btn btn-gold">CONTINUAR</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TELA DE VITÓRIA ===================== -->
+<section id="screen-win" class="screen">
+  <div class="confetti" id="confetti"></div>
+  <header class="app-header">
+    <img src="img/trivia-milhao.png" alt="Trivia do Milhão" class="app-header-logo">
+  </header>
+  <div class="result-box">
+    <h2 class="result-title win-title" id="win-title">PARABÉNS!</h2>
+    <p class="result-sub" id="win-sub">Você levou para casa:</p>
+    <p class="result-value" id="win-value">R$ 1.000.000</p>
+    <button id="btn-play-again-win" class="btn btn-gold">Jogar Novamente</button>
+  </div>
+</section>
+
+<!-- ===================== TELA DE DERROTA ===================== -->
+<section id="screen-lose" class="screen">
+  <header class="app-header">
+    <img src="img/trivia-milhao.png" alt="Trivia do Milhão" class="app-header-logo">
+  </header>
+  <div class="result-box">
+    <h2 class="result-title lose-title">QUE PENA!</h2>
+    <p class="result-sub">A resposta correta era:</p>
+    <p class="correct-answer-text" id="lose-correct-answer"></p>
+    <p class="result-sub">Você leva para casa:</p>
+    <p class="result-value lose-value" id="lose-value">R$ 0</p>
+    <button id="btn-play-again-lose" class="btn btn-gold">Jogar Novamente</button>
+  </div>
+</section>
+
+<script src="js/audio.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
